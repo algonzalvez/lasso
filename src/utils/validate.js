@@ -24,6 +24,7 @@ const Joi = require('joi');
  */
 function auditRequestValidation(req, res, next) {
   const schema = Joi.object({
+    mode: Joi.string(),
     urls: Joi.array().required().min(1).max(5),
     blockedRequests: Joi.array(),
   });
@@ -39,6 +40,7 @@ function auditRequestValidation(req, res, next) {
  */
 function asyncAuditRequestValidation(req, res, next) {
   const schema = Joi.object({
+    mode: Joi.string(),
     urls: Joi.array().required().min(1).max(1000),
     blockedRequests: Joi.array(),
   });

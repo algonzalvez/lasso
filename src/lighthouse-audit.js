@@ -105,6 +105,7 @@ class LighthouseAudit {
         const formattedAudit = Object.entries(this.auditFieldMapping).
             reduce((res, keyVal) => {
               res[keyVal[0]] = audit[keyVal[1]].numericValue;
+              res[keyVal[0] + '-score'] = audit[keyVal[1]].score;
               return res;
             }, {});
 

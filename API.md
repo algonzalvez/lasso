@@ -10,6 +10,7 @@ Runs one or more audits sequentially, utilizing a shared puppeteer instance betw
 | ------------- | ------------- | ------------- | ------------- |
 | urls  | Array | | List of urls to run a lighthouse audit on |
 | blockedRequests  | Array | Yes | List of requests to block on each audit e.g. 3rd party tag origins |
+| mode | string | Yes | By default is "mobile". We can use "desktop" or "all" that will retrieve all modes |
 
 **Example**
 
