@@ -61,7 +61,7 @@ async function performAudit(req, res) {
     try {
         switch(mode) {
             case 'all':
-                const modes = ['desktop', 'mobile'];
+                const modes = ['desktop', 'mobile', 'desktop2'];
                 results = [];
                 for (let i = 0; i < modes.length; i++) {
                     results = results.concat(
@@ -76,7 +76,7 @@ async function performAudit(req, res) {
                 break;
         }
 
-        //await writeResultStream(BQ_DATASET, BQ_TABLE, results);
+        await writeResultStream(BQ_DATASET, BQ_TABLE, results);
 
         return res.json(results);
     } catch (e) {
@@ -97,12 +97,12 @@ async function performAudit(req, res) {
  * @param {string} mode
  */
 async function performLightouseAudit(urls, blockedRequestPatterns = [], mode) {
-    const auditConfig = perfConfig.auditConfig;
+    let auditConfig = perfConfig.auditConfig;
+    // applying the same configuration that https://developers.google.com/speed/pagespeed/insights/ does
     if (mode == 'desktop') {
-        const lighthouse_desktop_config = require('lighthouse/lighthouse-core/config/desktop-config');
-        Object.keys(lighthouse_desktop_config.settings).map(key => {
-            auditConfig.settings[key] = lighthouse_desktop_config.settings[key];
-        });
+        auditConfig = require('lighthouse/lighthouse-core/config/desktop-config');
+    } else if (mode == 'mobile') {
+        auditConfig = require('lighthouse/lighthouse-core/config/lr-mobile-config');
     }
     const lhAudit = new LighthouseAudit(
         urls,
@@ -112,17 +112,8 @@ async function performLightouseAudit(urls, blockedRequestPatterns = [], mode) {
 
     await lhAudit.run();
     const results = lhAudit.getBQFormatResults().map(result => {
-        const finalResult = result;
-        // calculating the performance-scoring like https://web.dev/performance-scoring/
-        finalResult['performance-scoring'] = (result['firstContentfulPaint-score'] * 0.15
-            + result['largestContentfulPaint-score'] * 0.25
-            + result['speedIndex-score'] * 0.15
-            + result['interactive-score'] * 0.15
-            + result['totalBlockingTime-score'] * 0.25
-            + result['cumulativeLayoutShift-score'] * 0.05);
-
-        finalResult['mode'] = mode;
-        return finalResult;
+        result['mode'] = mode;
+        return result;
     });
 
     return results;

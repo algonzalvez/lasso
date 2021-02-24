@@ -37,6 +37,7 @@ class LighthouseAudit {
     this.auditConfig = auditConfig;
     this.auditResults = [];
     this.auditFieldMapping = auditFieldMapping;
+    this.performanceScore = 0;
   }
 
   /**
@@ -55,8 +56,9 @@ class LighthouseAudit {
 
       try {
         const page = await browser.newPage();
-        const metrics = await this.performAudit(url, page, this.blockedRequestPatterns);
-        this.auditResults.push(metrics);
+        const results = await this.performAudit(url, page, this.blockedRequestPatterns);
+        this.performanceScore = results.performance;
+        this.auditResults.push(results.metrics);
       } catch (e) {
         throw new Error(`${e.message} on ${url}`);
       }
@@ -82,10 +84,12 @@ class LighthouseAudit {
     return await lighthouse(url, options, this.auditConfig)
         .then((metrics) => {
           const audits = metrics.lhr.audits;
+          // adding the performance score
+          const performance = metrics.lhr.categories.performance.score;
 
           if (typeof(audits) != 'undefined' && audits != null) {
             audits['url'] = url;
-            return audits;
+            return { metrics: audits, performance: performance};
           }
         }).catch((e) => {
           throw new Error(`LH Audit error: ${e.message}`);
@@ -99,17 +103,20 @@ class LighthouseAudit {
    * @return {Array}
    */
   getBQFormatResults() {
-    const today = new Date().toJSON().slice(0, 10);
+    const today = new Date();
+    const date = today.toJSON().slice(0, 10);
+    const time = today.toJSON().slice(11,23);
     return this.auditResults.map((audit) => {
       if (typeof (audit) != 'undefined') {
         const formattedAudit = Object.entries(this.auditFieldMapping).
             reduce((res, keyVal) => {
               res[keyVal[0]] = audit[keyVal[1]].numericValue;
-              res[keyVal[0] + '-score'] = audit[keyVal[1]].score;
               return res;
             }, {});
 
-        formattedAudit['date'] = BigQuery.date(today);
+        formattedAudit['performanceScore'] = this.performanceScore;
+        formattedAudit['date'] = BigQuery.date(date);
+        formattedAudit['time'] = BigQuery.time(time);
         formattedAudit['url'] = audit.url;
         formattedAudit['blockedRequests'] = this.blockedRequestPatterns.join(',');
 
