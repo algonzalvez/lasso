@@ -61,7 +61,7 @@ async function performAudit(req, res) {
     try {
         switch(mode) {
             case 'all':
-                const modes = ['desktop', 'mobile', 'desktop2'];
+                const modes = ['desktop', 'mobile'];
                 results = [];
                 for (let i = 0; i < modes.length; i++) {
                     results = results.concat(
