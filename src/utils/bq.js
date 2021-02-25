@@ -52,10 +52,42 @@ async function createDatePartitionTable(datasetId, tableId, schema) {
 async function writeResultStream(datasetName, tableName, rows) {
   const bigqueryClient = new BigQuery();
 
-  return bigqueryClient
+  const allowedFields = ["firstContentfulPaint",
+      "largestContentfulPaint",
+      "firstMeaningfulPaint",
+      "speedIndex",
+      "estimatedInputLatency",
+      "totalBlockingTime",
+      "maxPotentialFID",
+      "cumulativeLayoutShift",
+      "firstCpuIdle",
+      "interactive",
+      "serverResponseTime",
+      "performanceScore",
+      "date",
+      "time",
+      "url",
+      "mode"];
+
+  const preparedRows = rows.map(row => {
+    let preparedRow = {};
+    allowedFields.forEach(field => {
+      preparedRow[field] = row[field];
+    });
+    return preparedRow;
+  });
+
+  bigqueryClient
       .dataset(datasetName)
       .table(tableName)
-      .insert(rows);
+      .insert(preparedRows)
+      .then((result) => {
+        console.log('Data saved');
+      })
+      .catch((err) => {
+          console.log('BigQuery fail');
+          console.log(JSON.stringify(err));
+      });
 }
 
 module.exports = {

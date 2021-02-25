@@ -56,7 +56,7 @@ async function performAudit(req, res) {
     const payload = req.body;
     const mode = typeof payload.mode == 'string' ? payload.mode : 'mobile';
     // by default, do not store data
-    const storeData = typeof payload.storeData == 'boolean' ? payload.storeDate : false;
+    const storeData = typeof payload.storeData == 'boolean' ? payload.storeData : false;
 
     let results;
 
