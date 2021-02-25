@@ -27,6 +27,7 @@ function auditRequestValidation(req, res, next) {
     mode: Joi.string(),
     urls: Joi.array().required().min(1).max(5),
     blockedRequests: Joi.array(),
+    storeData: Joi.boolean()
   });
 
   validateRequest(req, res, next, schema);
@@ -43,6 +44,7 @@ function asyncAuditRequestValidation(req, res, next) {
     mode: Joi.string(),
     urls: Joi.array().required().min(1).max(1000),
     blockedRequests: Joi.array(),
+    storeData: Joi.boolean()
   });
 
   validateRequest(req, res, next, schema);

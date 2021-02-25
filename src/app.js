@@ -54,7 +54,9 @@ async function performAudit(req, res) {
     const BQ_DATASET = process.env.BQ_DATASET;
     const BQ_TABLE = process.env.BQ_TABLE;
     const payload = req.body;
-    const mode = typeof payload.mode !== 'undefined' ? payload.mode : 'mobile';
+    const mode = typeof payload.mode !== 'string' ? payload.mode : 'mobile';
+    // by default, do not store data
+    const storeData = typeof payload.storeData !== 'boolean' ? payload.storeDate : false;
 
     let results;
 
@@ -76,7 +78,9 @@ async function performAudit(req, res) {
                 break;
         }
 
-        await writeResultStream(BQ_DATASET, BQ_TABLE, results);
+        if (storeData) {
+            await writeResultStream(BQ_DATASET, BQ_TABLE, results);
+        }
 
         return res.json(results);
     } catch (e) {
