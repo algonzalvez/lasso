@@ -11,6 +11,7 @@ Runs one or more audits sequentially, utilizing a shared puppeteer instance betw
 | urls  | Array | | List of urls to run a lighthouse audit on |
 | blockedRequests  | Array | Yes | List of requests to block on each audit e.g. 3rd party tag origins |
 | mode | string | Yes | By default is "mobile". We can use "desktop" or "all" that will retrieve all modes |
+| storeData | boolean | Yes | By default is false. Set as true to store data in BigQuery |
 
 **Example**
 
@@ -26,7 +27,9 @@ curl -X POST \
     ],
   "blockedRequests": [
     "https://www.someblockedrequestdomain.com"
-    ]
+    ],
+  "mode": "desktop",
+  "storeData": true
   }'
 ```
 
@@ -38,6 +41,8 @@ Schedules one or more audits to run asynchronously, utilizing [Cloud Tasks](http
 | ------------- | ------------- | ------------- | ------------- |
 | urls  | Array | | List of urls to run a lighthouse audit on |
 | blockedRequests  | Array | Yes | List of requests to block on each audit e.g. 3rd party tag origins |
+| mode | string | Yes | By default is "mobile". We can use "desktop" or "all" that will retrieve all modes |
+| storeData | boolean | Yes | By default is false. Set as true to store data in BigQuery |
 
 **Example**
 
