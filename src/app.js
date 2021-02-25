@@ -54,9 +54,9 @@ async function performAudit(req, res) {
     const BQ_DATASET = process.env.BQ_DATASET;
     const BQ_TABLE = process.env.BQ_TABLE;
     const payload = req.body;
-    const mode = typeof payload.mode !== 'string' ? payload.mode : 'mobile';
+    const mode = typeof payload.mode == 'string' ? payload.mode : 'mobile';
     // by default, do not store data
-    const storeData = typeof payload.storeData !== 'boolean' ? payload.storeDate : false;
+    const storeData = typeof payload.storeData == 'boolean' ? payload.storeDate : false;
 
     let results;
 
