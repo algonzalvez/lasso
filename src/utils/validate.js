@@ -23,9 +23,18 @@ const Joi = require('joi');
  * @param {Function} next
  */
 function auditRequestValidation(req, res, next) {
+  if(req.header('content-type') != 'application/json') {
+      console.log('Request header content-type is NOT application/json and MANUALLY parsing the req body as json');
+      try {
+          req.body = JSON.parse(req.body);
+      } catch (e) {
+          ;
+      }
+  }
+
   const schema = Joi.object({
     mode: Joi.string(),
-    urls: Joi.array().required().min(1).max(5),
+    urls: Joi.array().required().min(1).max(20),
     blockedRequests: Joi.array(),
     storeData: Joi.boolean()
   });

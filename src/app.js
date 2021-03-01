@@ -32,6 +32,7 @@ const {
 const app = express();
 
 app.use(express.raw());
+app.use(express.text());
 app.use(express.json({limit: '5mb', extended: true}));
 app.use(express.urlencoded({limit: '5mb', extended: true}));
 
@@ -51,13 +52,22 @@ app.get('/active-tasks', activeTasksRequestValidation, getActiveTasks);
  * @param {Object} res
  */
 async function performAudit(req, res) {
+    console.log(req.header('content-type') !== 'application/json');
     const BQ_DATASET = process.env.BQ_DATASET;
     const BQ_TABLE = process.env.BQ_TABLE;
+    if(req.header('content-type') != 'application/json') {
+        try {
+            req.body = JSON.parse(req.body);
+        } catch (e) {
+            ;
+        }
+    }
     const payload = req.body;
     const mode = typeof payload.mode == 'string' ? payload.mode : 'mobile';
     // by default, do not store data
     const storeData = typeof payload.storeData == 'boolean' ? payload.storeData : false;
 
+    console.log(payload);
     let results;
 
     try {

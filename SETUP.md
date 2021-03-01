@@ -26,6 +26,19 @@ The following ENV variables will need to be configured on cloud run:
 | CLOUD_TASKS_QUEUE_LOCATION  | Location of the cloud task queue |
 | SERVICE_URL  | base url and protocol of the deployed service on cloud run |
 
+### Cloud Scheduler options
+
+```
+gcloud scheduler jobs create http my_cron_job \
+  --schedule="every hour" \
+  --uri="YOUR_CLOUD_RUN_URL" \
+  --http-method=POST \
+  --message-body='{"urls": ["https://www.exampleurl1.com"], "mode": "all"}' \
+  --headers Content-Type=application/json
+```
+
+
+### Deploying to Cloud Run
 
 ### Running Locally via docker compose
 
