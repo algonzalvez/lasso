@@ -37,7 +37,7 @@ class LighthouseAudit {
     this.auditConfig = auditConfig;
     this.auditResults = [];
     this.auditFieldMapping = auditFieldMapping;
-    this.performanceScore = 0;
+    this.performanceScore = [];
   }
 
   /**
@@ -57,7 +57,7 @@ class LighthouseAudit {
       try {
         const page = await browser.newPage();
         const results = await this.performAudit(url, page, this.blockedRequestPatterns);
-        this.performanceScore = results.performance;
+        this.performanceScore.push(results.performance);
         this.auditResults.push(results.metrics);
       } catch (e) {
         throw new Error(`${e.message} on ${url}`);
@@ -106,6 +106,7 @@ class LighthouseAudit {
     const today = new Date();
     const date = today.toJSON().slice(0, 10);
     const time = today.toJSON().slice(11,23);
+    let it = 0;
     return this.auditResults.map((audit) => {
       if (typeof (audit) != 'undefined') {
         const formattedAudit = Object.entries(this.auditFieldMapping).
@@ -114,7 +115,7 @@ class LighthouseAudit {
               return res;
             }, {});
 
-        formattedAudit['performanceScore'] = this.performanceScore;
+        formattedAudit['performanceScore'] = this.performanceScore[it];
         formattedAudit['date'] = BigQuery.date(date);
         formattedAudit['time'] = BigQuery.time(time);
         formattedAudit['url'] = audit.url;
@@ -122,6 +123,8 @@ class LighthouseAudit {
 
         return formattedAudit;
       }
+
+      it ++;
     });
   }
 
