@@ -66,8 +66,17 @@ async function writeResultStream(datasetName, tableName, rows) {
       "performanceScore",
       "date",
       "time",
+      "formattedAudit",
       "url",
-      "mode"];
+      "mode",
+      "firstContentfulPaint_score",
+      "largestContentfulPaint_score",
+      "firstMeaningfulPaint_score",
+      "speedIndex_score",
+      "cumulativeLayoutShift_score",
+      "totalBlockingTime_score",
+      "interactive_score",
+      "serverResponseTime_score"];
 
   const preparedRows = rows.map(row => {
     let preparedRow = {};

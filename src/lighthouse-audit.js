@@ -112,19 +112,19 @@ class LighthouseAudit {
         const formattedAudit = Object.entries(this.auditFieldMapping).
             reduce((res, keyVal) => {
               res[keyVal[0]] = audit[keyVal[1]].numericValue;
+              res[keyVal[0] + '_score'] = audit[keyVal[1]].score;
               return res;
             }, {});
 
         formattedAudit['performanceScore'] = this.performanceScore[it];
         formattedAudit['date'] = BigQuery.date(date);
+        formattedAudit['datetime'] = BigQuery.datetime(date);
         formattedAudit['time'] = BigQuery.time(time);
         formattedAudit['url'] = audit.url;
         formattedAudit['blockedRequests'] = this.blockedRequestPatterns.join(',');
-
+        it ++;
         return formattedAudit;
       }
-
-      it ++;
     });
   }
 

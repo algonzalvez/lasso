@@ -52,7 +52,6 @@ app.get('/active-tasks', activeTasksRequestValidation, getActiveTasks);
  * @param {Object} res
  */
 async function performAudit(req, res) {
-    console.log(req.header('content-type') !== 'application/json');
     const BQ_DATASET = process.env.BQ_DATASET;
     const BQ_TABLE = process.env.BQ_TABLE;
     if(req.header('content-type') != 'application/json') {
@@ -67,7 +66,6 @@ async function performAudit(req, res) {
     // by default, do not store data
     const storeData = typeof payload.storeData == 'boolean' ? payload.storeData : false;
 
-    console.log(payload);
     let results;
 
     try {
