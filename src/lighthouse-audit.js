@@ -118,7 +118,7 @@ class LighthouseAudit {
 
         formattedAudit['performanceScore'] = this.performanceScore[it];
         formattedAudit['date'] = BigQuery.date(date);
-        formattedAudit['datetime'] = BigQuery.datetime(date);
+        formattedAudit['datetime'] = BigQuery.datetime(today.toISOString());
         formattedAudit['time'] = BigQuery.time(time);
         formattedAudit['url'] = audit.url;
         formattedAudit['blockedRequests'] = this.blockedRequestPatterns.join(',');
