@@ -66,7 +66,7 @@ async function writeResultStream(datasetName, tableName, rows) {
       "performanceScore",
       "date",
       "time",
-      "formattedAudit",
+      "datetime",
       "url",
       "mode",
       "firstContentfulPaint_score",
