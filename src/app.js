@@ -20,6 +20,7 @@ const path = require('path');
 const express = require('express');
 const perfConfig = require('./config.performance.js');
 const {LighthouseAudit} = require('./lighthouse-audit');
+const {PageSpeedInsightsAudit} = require('./pagespeedinsights-audit');
 const {CloudTasksClient} = require('@google-cloud/tasks');
 const {writeResultStream} = require('./utils/bq');
 const {getChunkedList, isURL} = require('./utils/api');
@@ -54,6 +55,7 @@ app.get('/active-tasks', activeTasksRequestValidation, getActiveTasks);
 async function performAudit(req, res) {
     const BQ_DATASET = process.env.BQ_DATASET;
     const BQ_TABLE = process.env.BQ_TABLE;
+    const BQ_TABLE_INSIGHTS = process.env.BQ_TABLE_INSIGHTS;
     if(req.header('content-type') != 'application/json') {
         try {
             req.body = JSON.parse(req.body);
@@ -63,31 +65,49 @@ async function performAudit(req, res) {
     }
     const payload = req.body;
     const mode = typeof payload.mode == 'string' ? payload.mode : 'mobile';
+    const engine = typeof payload.engine == 'string' ? payload.engine : 'lighthouse';
+
     // by default, do not store data
     const storeData = typeof payload.storeData == 'boolean' ? payload.storeData : false;
 
-    let results;
+    let results = {};
+    let lighthouseResults = [];
+    let pagePeedInsightsResults = [];
 
     try {
         switch(mode) {
             case 'all':
                 const modes = ['desktop', 'mobile'];
-                results = [];
                 for (let i = 0; i < modes.length; i++) {
-                    results = results.concat(
-                        await performLightouseAudit(payload.urls, payload.blockedRequests, modes[i])
+                    const partialResults = await performAuditMetrics(payload.urls, payload.blockedRequests, modes[i], engine);
+                    lighthouseResults = lighthouseResults.concat(
+                        partialResults['lighthouse']
+                    );
+                    pagePeedInsightsResults = pagePeedInsightsResults.concat(
+                        partialResults['pageSpeedInsights']
                     );
                 }
                 break;
             case 'desktop':
             case 'mobile':
             default:
-                results = await performLightouseAudit(payload.urls, payload.blockedRequests, mode);
+                const partialResults = await performAuditMetrics(payload.urls, payload.blockedRequests, mode, engine);
+                lighthouseResults = partialResults['lighthouse'];
+                pagePeedInsightsResults = partialResults['pageSpeedInsights'];
                 break;
         }
 
-        if (storeData) {
-            await writeResultStream(BQ_DATASET, BQ_TABLE, results);
+        if (lighthouseResults.length > 0) {
+            results['lighthouse'] = lighthouseResults;
+            if (storeData) {
+                await writeResultStream(BQ_DATASET, BQ_TABLE, lighthouseResults);
+            }
+        }
+        if (pagePeedInsightsResults.length > 0) {
+            results['pageSpeedInsights'] = pagePeedInsightsResults;
+            if (storeData) {
+                await writeResultStream(BQ_DATASET, BQ_TABLE_INSIGHTS, pagePeedInsightsResults);
+            }
         }
 
         return res.json(results);
@@ -103,30 +123,50 @@ async function performAudit(req, res) {
 }
 
 /**
- * performLightouseAudit with the provided mode,
+ * performAuditMetrics with the provided mode,
  * @param {Array} urls
  * @param {Array} blockedRequestPatterns
  * @param {string} mode
+ * @param {string} engine
  */
-async function performLightouseAudit(urls, blockedRequestPatterns = [], mode) {
-    let auditConfig = perfConfig.auditConfig;
-    // applying the same configuration that https://developers.google.com/speed/pagespeed/insights/ does
-    if (mode == 'desktop') {
-        auditConfig = require('lighthouse/lighthouse-core/config/desktop-config');
-    } else if (mode == 'mobile') {
-        auditConfig = require('lighthouse/lighthouse-core/config/lr-mobile-config');
+async function performAuditMetrics(urls, blockedRequestPatterns = [], mode, engine) {
+    let results = {
+      'lighthouse': [],
+      'pageSpeedInsights': []
+    };
+    if (engine == 'both' || engine == 'pageSpeedInsights') {
+        const psiAudit = new PageSpeedInsightsAudit(
+            urls,
+            mode,
+            perfConfig.auditResultsMapping);
+        await psiAudit.run();
+        results['pageSpeedInsights'] = psiAudit.getBQFormatResults().map(result => {
+            console.log(result);
+            result['mode'] = mode;
+            return result;
+        });
     }
-    const lhAudit = new LighthouseAudit(
-        urls,
-        blockedRequestPatterns,
-        auditConfig,
-        perfConfig.auditResultsMapping);
 
-    await lhAudit.run();
-    const results = lhAudit.getBQFormatResults().map(result => {
-        result['mode'] = mode;
-        return result;
-    });
+    if (engine == 'both' || engine == 'lighthouse') {
+        let auditConfig = perfConfig.auditConfig;
+        // applying the same configuration that https://developers.google.com/speed/pagespeed/insights/ does
+        if (mode == 'desktop') {
+            auditConfig = require('lighthouse/lighthouse-core/config/desktop-config');
+        } else if (mode == 'mobile') {
+            auditConfig = require('lighthouse/lighthouse-core/config/lr-mobile-config');
+        }
+        const lhAudit = new LighthouseAudit(
+            urls,
+            blockedRequestPatterns,
+            auditConfig,
+            perfConfig.auditResultsMapping);
+
+        await lhAudit.run();
+        results['lighthouse'] = lhAudit.getBQFormatResults().map(result => {
+            result['mode'] = mode;
+            return result;
+        });
+    }
 
     return results;
 

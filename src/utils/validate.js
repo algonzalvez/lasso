@@ -31,9 +31,9 @@ function auditRequestValidation(req, res, next) {
           ;
       }
   }
-
   const schema = Joi.object({
     mode: Joi.string(),
+    engine: Joi.string(),
     urls: Joi.array().required().min(1).max(20),
     blockedRequests: Joi.array(),
     storeData: Joi.boolean()
@@ -52,6 +52,7 @@ function asyncAuditRequestValidation(req, res, next) {
   const schema = Joi.object({
     mode: Joi.string(),
     urls: Joi.array().required().min(1).max(1000),
+    engine: Joi.string(),
     blockedRequests: Joi.array(),
     storeData: Joi.boolean()
   });

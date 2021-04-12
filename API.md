@@ -12,6 +12,8 @@ Runs one or more audits sequentially, utilizing a shared puppeteer instance betw
 | blockedRequests  | Array | Yes | List of requests to block on each audit e.g. 3rd party tag origins |
 | mode | string | Yes | By default is "mobile". We can use "desktop" or "all" that will retrieve all modes |
 | storeData | boolean | Yes | By default is false. Set as true to store data in BigQuery |
+| mode | string | Yes | By default is "lighthouse". We can use "lighthouse", "both" or "pageSpeedInsights" for the PSI metrics |
+
 
 **Example**
 

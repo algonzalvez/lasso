@@ -49,7 +49,9 @@ Set the path for the Google Cloud credentials of the project as an ENV variable 
 | ENV var  | Description |
 | ------------- | ------------- |
 | BQ_DATASET  | The name of a BigQuery dataset containing your results table |
-| BQ_TABLE  | The name of the BQ table to output results to |
+| BQ_TABLE  | The name of the BQ table to output lighthouse results |
+| BQ_TABLE_INSIGHTS  | The name of the BQ table to output PSI results |
+| GOOGLE_INSIGHTS_KEY  | API KEY to be used (otherwise, the nokey option will be used |
 | GOOGLE_CLOUD_PROJECT  | ID of your cloud project |
 | CLOUD_TASKS_QUEUE  | Name of your cloud tasks queue |
 | CLOUD_TASKS_QUEUE_LOCATION  | Location of the cloud task queue |
