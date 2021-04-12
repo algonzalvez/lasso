@@ -141,7 +141,6 @@ async function performAuditMetrics(urls, blockedRequestPatterns = [], mode, engi
             perfConfig.auditResultsMapping);
         await psiAudit.run();
         results['pageSpeedInsights'] = psiAudit.getBQFormatResults().map(result => {
-            console.log(result);
             result['mode'] = mode;
             return result;
         });
