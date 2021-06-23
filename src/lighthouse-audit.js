@@ -111,8 +111,8 @@ class LighthouseAudit {
       if (typeof (audit) != 'undefined') {
         const formattedAudit = Object.entries(this.auditFieldMapping).
             reduce((res, keyVal) => {
-              res[keyVal[0]] = audit[keyVal[1]].numericValue;
-              res[keyVal[0] + '_score'] = audit[keyVal[1]].score;
+              res[keyVal[0]] = audit[keyVal[1]] ? audit[keyVal[1]].numericValue : 0;
+              res[keyVal[0] + '_score'] = audit[keyVal[1] ? audit[keyVal[1]].score : 0;
               return res;
             }, {});
 
