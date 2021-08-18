@@ -108,7 +108,7 @@ class PageSpeedInsightsAudit {
         const formattedAudit = Object.entries(this.auditFieldMapping).
             reduce((res, keyVal) => {
               res[keyVal[0]] = audit[keyVal[1]] ? audit[keyVal[1]].numericValue : 0;
-              res[keyVal[0] + '_score'] = audit[keyVal[1] ? audit[keyVal[1]].score : 0;
+              res[keyVal[0] + '_score'] = audit[keyVal[1]] ? audit[keyVal[1]].score : 0;
               return res;
             }, {});
 
